@@ -49,6 +49,12 @@ public class RLocalProfile implements Compressable, Serializable {
     @GsonRevision(min=0x3b6)
     public boolean fromProductionBuild = true;
 
+    @GsonRevision(min=0x133, max=0x1de)
+    public SlotID[] unkSlots;
+
+    @GsonRevision(min=0x129, max=0x268)
+    public SlotID[] lockStates;
+
     @GsonRevision(min=0x1e4)
     public HashMap<TutorialLevel, TutorialState> lbp1TutorialStates = new HashMap<>();
 
@@ -392,10 +398,11 @@ public class RLocalProfile implements Compressable, Serializable {
         if (version >= 0x133 && version < 0x1df) {
             // set of slot ids
             // ???
+            profile.unkSlots = serializer.array(profile.unkSlots, SlotID.class);
         }
 
         if (version < 0x269 && version > 0x128) {
-            // lockStates
+            profile.lockStates = serializer.array(profile.lockStates, SlotID.class);
         }
 
         if (version > 0x1e3) {
@@ -793,7 +800,7 @@ public class RLocalProfile implements Compressable, Serializable {
             revision, 
             compressionFlags, 
             ResourceType.LOCAL_PROFILE,
-            SerializationType.BINARY, 
+            SerializationType.ENCRYPTED_BINARY, 
             serializer.getDependencies()
         );
     }
