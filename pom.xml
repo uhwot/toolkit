@@ -16,6 +16,7 @@
 
         <module>tools/jsoninator</module>
         <module>tools/descriptor</module>
+        <module>tools/littletool</module>
 
         <module>toolkit</module>
     </modules>

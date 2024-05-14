@@ -49,6 +49,9 @@ public class RLocalProfile implements Resource
     @GsonRevision(min = 0x3b6)
     public boolean fromProductionBuild = true;
 
+    @GsonRevision(min = 0x129, max = 0x268)
+    public HashMap<SlotID, Integer> lockStates = new HashMap<>();
+
     @GsonRevision(min = 0x1e4)
     public HashMap<TutorialLevel, TutorialState> lbp1TutorialStates = new HashMap<>();
 
@@ -403,7 +406,25 @@ public class RLocalProfile implements Resource
 
         if (version < 0x269 && version > 0x128)
         {
-            // HashMap<SlotID, int> LockStates
+            if (serializer.isWriting())
+            {
+                Set<SlotID> keys = lockStates.keySet();
+                serializer.getOutput().i32(keys.size());
+                for (SlotID key : keys)
+                {
+                    serializer.struct(key, SlotID.class);
+                    serializer.i32(lockStates.get(key));
+                }
+            }
+            else
+            {
+                int count = serializer.getInput().i32();
+                lockStates = new HashMap<SlotID, Integer>(count);
+                for (int i = 0; i < count; ++i)
+                    lockStates.put(
+                        serializer.struct(null, SlotID.class),
+                        serializer.i32(0));
+            }
         }
 
         if (version > 0x1e3)
@@ -898,7 +919,7 @@ public class RLocalProfile implements Resource
             revision,
             compressionFlags,
             ResourceType.LOCAL_PROFILE,
-            SerializationType.BINARY,
+            SerializationType.ENCRYPTED_BINARY,
             serializer.getDependencies()
         );
     }
