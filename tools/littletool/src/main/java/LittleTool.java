@@ -10,7 +10,6 @@ import cwlib.util.FileIO;
 import cwlib.util.GsonUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +51,7 @@ public class LittleTool {
         }
     }
 
-    private static void exporter(String fart, String outputDir) throws FileNotFoundException, IOException {
+    private static void exporter(String fart, String outputDir) throws IOException {
         SaveArchive archive = new SaveArchive(new File(fart));
 
         SerializedResource profileRes = new SerializedResource(archive.extract(archive.getKey().getRootHash()));
@@ -85,6 +84,10 @@ public class LittleTool {
             for (ResourceDescriptor resDesc : podLvl.getDependencies()) {
                 if (resDesc.isHash()) {
                     byte[] data = archive.extract(resDesc.getSHA1());
+                    if (data == null) {
+                        System.out.println("WARNING: pod level has missing dependency, skipping...");
+                        continue;
+                    }
                     FileIO.write(data, Paths.get(outputDir, "pod_resources", resDesc.getSHA1().toString()).toString());
                 }
             }
@@ -93,6 +96,10 @@ public class LittleTool {
         for (ResourceDescriptor resDesc : syncedRes.getDependencies()) {
             if (resDesc.isHash()) {
                 byte[] data = archive.extract(resDesc.getSHA1());
+                if (data == null) {
+                    System.out.println("WARNING: synced profile has missing dependency, skipping...");
+                    continue;
+                }
                 FileIO.write(data, Paths.get(outputDir, "synced_resources", resDesc.getSHA1().toString()).toString());
             }
         }
@@ -100,7 +107,7 @@ public class LittleTool {
         Files.copy(Path.of(fart), Paths.get(outputDir, "littlefart_bkp"), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private static void importer(String inputDir, String outFart) throws FileNotFoundException, IOException {
+    private static void importer(String inputDir, String outFart) {
         SaveArchive archive = new SaveArchive(Paths.get(inputDir, "littlefart_bkp").toFile());
 
         WrappedResource localWrapper = GsonUtils.fromJSON(
@@ -127,6 +134,9 @@ public class LittleTool {
             for (ResourceDescriptor resDesc : podLvl.getDependencies()) {
                 if (resDesc.isHash()) {
                     byte[] data = FileIO.read(Paths.get(inputDir, "pod_resources", resDesc.getSHA1().toString()).toString());
+                    if (data == null) {
+                        continue;
+                    }
                     archive.add(data);
                 }
             }
@@ -136,6 +146,9 @@ public class LittleTool {
         for (ResourceDescriptor resDesc : syncedRes.getDependencies()) {
             if (resDesc.isHash()) {
                 byte[] data = FileIO.read(Paths.get(inputDir, "synced_resources", resDesc.getSHA1().toString()).toString());
+                if (data == null) {
+                    continue;
+                }
                 archive.add(data);
             }
         }

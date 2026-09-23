@@ -23,6 +23,7 @@
         <module>tools/asya</module>
         <module>tools/istanbul</module>
         <module>tools/spatialocality</module>
+        <module>tools/littletool</module>
         
         <module>toolkit</module>
     </modules>
