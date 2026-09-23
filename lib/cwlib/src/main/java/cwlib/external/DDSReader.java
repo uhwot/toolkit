@@ -122,7 +122,6 @@ public final class DDSReader
         }
 
         int[] pixels = null;
-        System.out.println(type);
         switch (type)
         {
             case 16711680:

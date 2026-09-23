@@ -55,7 +55,7 @@ public class PPos implements Serializable
         this.thingOfWhichIAmABone = root;
         this.animHash = animHash;
         this.worldPosition = wpos;
-        this.localPosition = wpos;
+        this.localPosition = new Matrix4f(wpos);
     }
 
     public PPos(Thing root, int animHash, Matrix4f wpos, Matrix4f pos)
